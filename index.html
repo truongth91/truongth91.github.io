@@ -1,1 +1,99 @@
-Hello
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egg Game Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            max-width: 400px;
+        }
+        input, button {
+            display: block;
+            margin-top: 10px;
+            padding: 8px;
+            width: 100%;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h2>Egg Game Calculator</h2>
+    <label>Current Unopened Eggs:</label>
+    <input type="number" id="unopenedEggs">
+    
+    <label>Daily Unopened Egg Reward:</label>
+    <input type="number" id="dailyUnopened">
+    
+    <label>Daily Opened Egg Reward:</label>
+    <input type="number" id="dailyOpened">
+    
+    <label>Game Duration (Days):</label>
+    <input type="number" id="gameDays">
+    
+    <button onclick="calculateEggs()">Calculate</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function saveData() {
+            localStorage.setItem('unopenedEggs', document.getElementById('unopenedEggs').value);
+            localStorage.setItem('dailyUnopened', document.getElementById('dailyUnopened').value);
+            localStorage.setItem('dailyOpened', document.getElementById('dailyOpened').value);
+            localStorage.setItem('gameDays', document.getElementById('gameDays').value);
+        }
+
+        function loadData() {
+            document.getElementById('unopenedEggs').value = localStorage.getItem('unopenedEggs') || 9315;
+            document.getElementById('dailyUnopened').value = localStorage.getItem('dailyUnopened') || 120;
+            document.getElementById('dailyOpened').value = localStorage.getItem('dailyOpened') || 105;
+            document.getElementById('gameDays').value = localStorage.getItem('gameDays') || 6;
+        }
+
+        function calculateEggs() {
+            saveData();
+            
+            const unopenedEggs = parseInt(document.getElementById('unopenedEggs').value);
+            const dailyUnopened = parseInt(document.getElementById('dailyUnopened').value);
+            const dailyOpened = parseInt(document.getElementById('dailyOpened').value);
+            const gameDays = parseInt(document.getElementById('gameDays').value);
+            
+            const rounds = 4;
+            const pointsPerRound = 4000;
+            const totalPointsNeeded = rounds * pointsPerRound;
+            const eggsPer30 = 35; // Conversion rate
+            const refundPerRound = 500; // Refund per completed round
+            const totalRefund = rounds * refundPerRound;
+            
+            // Total unopened eggs available
+            const totalUnopened = unopenedEggs + (dailyUnopened * gameDays) + totalRefund;
+            
+            // Convert unopened eggs to opened eggs (using the 30 -> 35 conversion rate)
+            const openedFromConversion = Math.floor((totalUnopened * eggsPer30) / 30);
+            
+            // Total opened eggs available
+            const totalOpened = openedFromConversion + (dailyOpened * gameDays);
+            
+            const shortfall = totalPointsNeeded - totalOpened;
+            
+            let resultText = "";
+            if (shortfall <= 0) {
+                resultText = "✅ You can complete the event! Go for it!";
+            } else {
+                const extraUnopenedNeeded = Math.ceil((shortfall * 30) / eggsPer30);
+                resultText = `❌ You need ${extraUnopenedNeeded} more unopened eggs to complete the event. Consider skipping this event and waiting for the next one.`;
+            }
+            
+            document.getElementById('result').innerText = resultText;
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
